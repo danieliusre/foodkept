@@ -21,6 +21,9 @@ namespace FoodKept.Data
         public DbSet<Discount> DiscountData { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<StarRating> StarRating { get; set; }
+        public DbSet<Tokens> Tokens { get; set; }
+
+        public DbSet<User> User { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +34,8 @@ namespace FoodKept.Data
             modelBuilder.Entity<Discount>().ToTable("Discount");
             modelBuilder.Entity<Feedback>().ToTable("Feedback");
             modelBuilder.Entity<StarRating>().ToTable("StarRating");
+            modelBuilder.Entity<Tokens>().ToTable("Tokens");
+            modelBuilder.Entity<User>().ToTable("Users");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
