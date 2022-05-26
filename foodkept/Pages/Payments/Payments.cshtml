@@ -1,0 +1,134 @@
+﻿@page
+@model FoodKept.Pages.FoodCustomer.CartModel
+@{
+    ViewData["Cart"] = "Cart";
+}
+@Html.AntiForgeryToken()
+<div class="container container_mt">
+    <div>
+        <form method="post">
+            <div class="nav nav-link">
+                <button type="submit" class="btn btn-dark pl-3 pr-3 mt-0 mb-0 justify-content-end" asp-page-handler="Reserve">Reserve</button>
+            </div>
+        </form>
+    </div>
+    @if (ViewData["Message"] != null)
+    {
+        <script type="text/javascript">
+            window.onload = function () {
+                alert("@ViewData["Message"]");
+            };
+        </script>
+    }
+    <table class="table">
+        <thead>
+            <tr>
+
+                <th></th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Restaurant
+                </th>
+                <th>
+                    Price
+                </th>
+                <th>
+                    Quantity
+                </th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var food in Model.Cart)
+            {
+                <tr>
+                    <td>
+                        <form method="post">
+                            <button type="submit" class="btn btn-light" id="removeFromCart" asp-page-handler="RemoveFromCart" asp-route-id="@food.Id">X</button>
+                        </form>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => food.Food.FoodName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => food.Food.ApplicationUser.RestaurantName)
+                    </td>
+                    <td>
+                        @if (food.Food.CurrentPrice.IsDiscount)
+                        {
+                            <span class="oldPrice">
+                                @food.Food.CurrentPrice.OldPrice&euro;
+                            </span>
+                            <span class="newPrice ml-2">
+                                @food.Food.CurrentPrice.DiscountPrice&euro;
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                @food.Food.Price&euro;
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        <div class="number" data-arg-id="@food.Id" data-arg-quantity="@food.Food.Quantity">
+                            <button type="button" class="minus">-</button>
+                            <label style="width: 50px; text-align: center;">@food.Quantity</label>
+                            <button type="button" class="plus">+</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.minus').click(function () {
+            var $input = $(this).parent().find('label');
+            var $id = $(this).parent().attr('data-arg-id');
+            var count = parseInt($input.text()) - 1;
+            count = count < 1 ? 1 : count;
+            $input.text(count);
+            $input.change();
+            changeQuantity($input.text(), $id);
+            return false;
+        });
+        $('.plus').click(function () {
+            var $input = $(this).parent().find('label');
+            var $id = $(this).parent().attr('data-arg-id');
+            var $quantity = $(this).parent().attr('data-arg-quantity');
+            $input.text((parseInt($input.text()) < $quantity) ? (parseInt($input.text()) + 1) : $quantity);
+            $input.change();
+            changeQuantity($input.text(), $id);
+            return false;
+        });
+        function changeQuantity(minus_plus, id) {
+            $.ajax({
+                type: "POST",
+                url: "/FoodCustomer/Cart?handler=ChangeQuantity",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("XSRF-TOKEN",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                data: {
+                    "minus_plus": minus_plus,
+                    "id": id
+                },
+                success: function (response) {
+                    alert("Quantity change: " + response.minus_plus + ", Id: " + response.id);
+                },
+                error: function (error) {
+                    alert("error " + error);
+                }
+            })
+        };
+    });
+</script>
+
+
